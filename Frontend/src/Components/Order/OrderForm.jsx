@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Form from '../../Layout/Form'
 import Grid from '@mui/material/Grid2';
 import { Input, Button, Select } from '../../Controls';
@@ -9,6 +9,7 @@ import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Reorder } from '@mui/icons-material';
 import { grey } from '@mui/material/colors';
+import { createAPIEndpoint, ENDPOINTS } from '../../api';
 
 const pMethods = [
     { id: 'none', title: "Select" },
@@ -53,6 +54,21 @@ const OrderForm = (props) => {
 
     const { values, handleInputChange, errors } = props;
 
+    const [customerList, setCustomerList] = useState([])
+
+    useEffect(() => {
+        createAPIEndpoint(ENDPOINTS.CUSTOMER).fetchAll()
+            .then((res) => {
+                let customerList = res.data.map((item) => ({
+                    id: item.customerID,
+                    title: item.customerName
+                }))
+                customerList = [{ id: 0, title: 'Select' }].concat(customerList);
+                setCustomerList(customerList)
+            })
+            .catch((err) => console.log(err))
+    }, [])
+
     return (
         <Form>
             <Grid container>
@@ -75,14 +91,7 @@ const OrderForm = (props) => {
                         name="customerId"
                         value={values.customerId}
                         onChange={handleInputChange}
-                        options={[
-                            { id: 0, title: "Select" },
-                            { id: 1, title: "Customer 1" },
-                            { id: 2, title: "Customer 2" },
-                            { id: 3, title: "Customer 3" },
-                            { id: 4, title: "Customer 4" },
-
-                        ]}
+                        options={customerList}
                     />
                 </Grid>
 

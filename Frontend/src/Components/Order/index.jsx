@@ -1,6 +1,9 @@
 import React from 'react'
 import OrderForm from './OrderForm'
 import { useForm } from '../../Hooks/UseForm';
+import Grid from '@mui/material/Grid2';
+import SearchFoodItems from './SearchFoodItems';
+import OrderedFoodItems from './OrderedFoodItems';
 
 
 
@@ -34,9 +37,29 @@ const Order = () => {
 
 
 
-    return (
 
-        < OrderForm values={values} errors={errors} handleInputChange={handleInputChange} />
+
+
+    return (
+        <>
+            < OrderForm values={values} errors={errors} handleInputChange={handleInputChange} />
+
+            <Grid container spacing={2}>
+                <Grid size={6} >
+                    <SearchFoodItems
+                        values={values}
+                        setValues={setValues}
+                    />
+                </Grid>
+
+                <Grid size={6}>
+                    <OrderedFoodItems
+                        values={values}
+                        setValues={setValues}
+                    />
+                </Grid>
+            </Grid>
+        </>
     )
 }
 

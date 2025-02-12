@@ -19,6 +19,13 @@ builder.Services.AddDbContext<RestaurantDbContext>(options => options.UseSqlServ
 
 var app = builder.Build();
 
+//Enabling CORS to accept api requests from another app ore port number
+app.UseCors(options => options
+.WithOrigins("http://localhost:5173")
+.AllowAnyMethod()
+.AllowAnyHeader()
+);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
