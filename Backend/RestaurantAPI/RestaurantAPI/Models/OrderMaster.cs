@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
+
 
 namespace RestaurantAPI.Models
 {
@@ -17,7 +19,7 @@ namespace RestaurantAPI.Models
         public string OrderNumber { get; set; }
 
         public int CustomerId { get; set; }
-        public Customer Customer { get; set; }
+        public Customer? Customer { get; set; }
 
         [Column(TypeName = "nvarchar(10)")]
         public string PMethod { get; set; }

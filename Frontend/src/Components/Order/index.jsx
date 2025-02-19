@@ -42,7 +42,7 @@ const Order = () => {
 
     return (
         <>
-            < OrderForm values={values} errors={errors} handleInputChange={handleInputChange} />
+            < OrderForm resetFormControls={resetFormControls} values={values} setValues={setValues} errors={errors} setErrors={setErrors} handleInputChange={handleInputChange} />
 
             <Grid container spacing={2}>
                 <Grid size={6} >
@@ -54,6 +54,7 @@ const Order = () => {
 
                 <Grid size={6}>
                     <OrderedFoodItems
+                        errors={errors}
                         values={values}
                         setValues={setValues}
                     />

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
+
 
 namespace RestaurantAPI.Models
 {
@@ -15,7 +17,8 @@ namespace RestaurantAPI.Models
         public long OrderMasterId { get; set; }
 
         public int FoodItemId { get; set; }
-        public FoodItem FoodItem { get; set; }
+
+        public FoodItem? FoodItem { get; set; }
 
         public decimal FoodItemPrice { get; set; }
 

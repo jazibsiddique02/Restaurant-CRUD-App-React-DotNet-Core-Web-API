@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,9 @@ namespace RestaurantAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderMaster>>> GetOrderMasters()
         {
-            return await _context.OrderMasters.ToListAsync();
+            return await _context.OrderMasters
+                .Include(x=>x.Customer)
+                .ToListAsync();
         }
 
         // GET: api/Order/5
@@ -77,7 +80,28 @@ namespace RestaurantAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<OrderMaster>> PostOrderMaster(OrderMaster orderMaster)
         {
+
+            // Fetch the related Customer from the database using CustomerId
+            var customer = await _context.Customers.FindAsync(orderMaster.CustomerId);        
+
+            // Assign the fetched Customer to the OrderMaster's navigation property
+            orderMaster.Customer = customer;
+
+            // Iterate through each OrderDetail in the OrderDetails list
+            foreach (var orderDetail in orderMaster.OrderDetails)
+            {
+                // Fetch the related FoodItem from the database using FoodItemId
+                var foodItem = await _context.FoodItems.FindAsync(orderDetail.FoodItemId);
+
+                // Assign the fetched FoodItem to the OrderDetail's navigation property
+                orderDetail.FoodItem = foodItem;
+
+                orderDetail.FoodItemPrice = foodItem.Price * orderDetail.Quantity;
+            }
+
+
             _context.OrderMasters.Add(orderMaster);
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrderMaster", new { id = orderMaster.OrderMasterId }, orderMaster);

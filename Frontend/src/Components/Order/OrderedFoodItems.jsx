@@ -46,6 +46,13 @@ const StyledTypography = styled(Typography)(({ theme }) => ({
 }));
 
 
+const StyledListItemText = styled(ListItemText)(({ theme }) => ({
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: '100px',
+}));
+
+
 
 
 
@@ -56,7 +63,7 @@ const StyledTypography = styled(Typography)(({ theme }) => ({
 
 export default function OrderedFoodItems(props) {
 
-    const { values, setValues } = props;
+    const { values, setValues, errors } = props;
 
     let orderedFoodItems = values.orderDetails;
 
@@ -94,60 +101,67 @@ export default function OrderedFoodItems(props) {
     return (
         <>
             {
-                orderedFoodItems.map((item, index) => (
-                    <StyledPaper key={index}>
-                        <ListItem
-                            secondaryAction={
-                                <StyledDeleteButton className="deleteButton"> {/* Add class name here */}
-                                    <IconButton onClick={() => removeOrderedFoodItem(item.orderDetailId, index)}>
-                                        <DeleteTwoTone />
-                                    </IconButton>
-                                </StyledDeleteButton>
-                            }
-                        >
-                            <ListItemText
-                                primary={
-                                    <Typography
-                                        component="h1"
-                                        fontWeight="500"
-                                        fontSize="1.2em"
-                                    >
-                                        {item.foodItemName}
-                                    </Typography>
+                orderedFoodItems.length == 0 ?
+                    <ListItem>
+                        <StyledListItemText>
+                            Please Select Food Item
+                        </StyledListItemText>
+                    </ListItem>
+                    :
+                    orderedFoodItems.map((item, index) => (
+                        <StyledPaper key={index}>
+                            <ListItem
+                                secondaryAction={
+                                    <StyledDeleteButton className="deleteButton"> {/* Add class name here */}
+                                        <IconButton onClick={() => removeOrderedFoodItem(item.orderDetailId, index)}>
+                                            <DeleteTwoTone />
+                                        </IconButton>
+                                    </StyledDeleteButton>
                                 }
-
-                                secondary={
-                                    <div>
-                                        <StyledButtonGroup
-                                            size='small'
+                            >
+                                <ListItemText
+                                    primary={
+                                        <Typography
+                                            component="h1"
+                                            fontWeight="500"
+                                            fontSize="1.2em"
                                         >
-                                            <Button
-                                                onClick={e => updateQuantity(index, -1)}
-                                            >-</Button>
-                                            <Button disabled>{item.quantity}</Button>
-                                            <Button
-                                                onClick={(e) => updateQuantity(index, 1)}
-                                            >+</Button>
-                                        </StyledButtonGroup>
+                                            {item.foodItemName}
+                                        </Typography>
+                                    }
 
-                                        <StyledTypography
-                                            component={'span'}
-                                        >
-                                            {'$' + roundTo2DecimalPoint(item.quantity * item.price)}
-                                        </StyledTypography>
-                                    </div>
-                                }
+                                    secondary={
+                                        <Typography component={'span'}>
+                                            <StyledButtonGroup
+                                                size='small'
+                                            >
+                                                <Button
+                                                    onClick={e => updateQuantity(index, -1)}
+                                                >-</Button>
+                                                <Button disabled>{item.quantity}</Button>
+                                                <Button
+                                                    onClick={(e) => updateQuantity(index, 1)}
+                                                >+</Button>
+                                            </StyledButtonGroup>
+
+                                            <StyledTypography
+                                                component={'span'}
+                                            >
+                                                {'$' + roundTo2DecimalPoint(item.quantity * item.price)}
+                                            </StyledTypography>
+                                        </Typography>
+                                    }
 
 
 
 
 
-                            />
+                                />
 
 
-                        </ListItem>
-                    </StyledPaper>
-                ))
+                            </ListItem>
+                        </StyledPaper>
+                    ))
             }
         </>
     )

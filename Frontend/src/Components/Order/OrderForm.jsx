@@ -10,6 +10,10 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { Reorder } from '@mui/icons-material';
 import { grey } from '@mui/material/colors';
 import { createAPIEndpoint, ENDPOINTS } from '../../api';
+import { roundTo2DecimalPoint } from '../../utils';
+import Popup from '../../Layout/Popup';
+import ListOfOrders from './ListOfOrders';
+
 
 const pMethods = [
     { id: 'none', title: "Select" },
@@ -52,98 +56,214 @@ const StyledButtonGroup = styled(ButtonGroup)(({ theme }) => ({
 const OrderForm = (props) => {
 
 
-    const { values, handleInputChange, errors } = props;
+    const { resetFormControls, values, handleInputChange, setValues, errors, setErrors } = props;
 
     const [customerList, setCustomerList] = useState([])
 
+    const [Loading, setLoading] = useState(true);
+
+    const [orderListVisibility, setOrderListVisibility] = useState(false);
+
+
+
+
+    // Fetch customer list asynchronously
     useEffect(() => {
-        createAPIEndpoint(ENDPOINTS.CUSTOMER).fetchAll()
-            .then((res) => {
+        const fetchCustomers = async () => {
+            try {
+                const res = await createAPIEndpoint(ENDPOINTS.CUSTOMER).fetchAll();
                 let customerList = res.data.map((item) => ({
                     id: item.customerID,
-                    title: item.customerName
-                }))
+                    title: item.customerName,
+                }));
+
+                // Add default option
                 customerList = [{ id: 0, title: 'Select' }].concat(customerList);
-                setCustomerList(customerList)
-            })
-            .catch((err) => console.log(err))
-    }, [])
+
+                // Update state
+                setCustomerList(customerList);
+                setLoading(false); // Data fetching is complete
+            } catch (err) {
+                console.error(err);
+                setLoading(false); // Stop loading even if there's an error
+            }
+        };
+
+        fetchCustomers();
+    }, []);
+
+
+
+
+
+
+
+
+
+
+
+    // Updating grand total field with each new order or additional quantity
+    // we used JSON.stringify because useEffect wont be triggered if we just pass
+    // values.orderDetails because orderDetails is a nested property of values state object
+
+    useEffect(() => {
+        let gTotal = values.orderDetails.reduce((tempTotal, item) => {
+            return tempTotal + (item.quantity * item.price);
+
+        }, 0); // 0 here initializes tempTotal parameter to 0
+
+        setValues({
+            ...values,
+            gTotal: roundTo2DecimalPoint(gTotal)
+        })
+
+    }, [JSON.stringify(values.orderDetails)])
+
+
+
+    // function for validating form
+    const validateForm = () => {
+        let temp = {}
+        temp.customerId = values.customerId != 0 ? "" : "This Field Is Required"
+        temp.pMethod = values.pMethod != "none" ? "" : "This Field Is Required"
+        temp.orderDetails = values.orderDetails.length != 0 ? "" : "This Field Is Required"
+        setErrors({
+            ...temp
+        })
+
+        return Object.values(temp).every(x => x === "")          // Object.values returns a collection of all values inside temp
+    }
+    // and every method iterates all values to check whether all return "" or not and returns true or false
+
+
+
+
+
+
+
+
+
+
+    // function for submitting order
+    const submitOrder = (e) => {
+        e.preventDefault();
+        if (validateForm()) {
+
+            console.log(values)
+            createAPIEndpoint(ENDPOINTS.ORDER).create(values)
+                .then(res => resetFormControls())
+                .catch(err => console.log(err))
+        }
+
+    }
+
+
+
+
+    // Show a loading message while data is being fetched
+    if (Loading) {
+        return <h1>Loading...</h1>; // Replace with a proper loading spinner if needed
+    }
+
+
+    const openListOfOrders = () => {
+        setOrderListVisibility(true)
+    }
+
+
 
     return (
-        <Form>
-            <Grid container>
-                <Grid size={6}>
+        <>
+            <Form onSubmit={submitOrder}>
+                <Grid container>
+                    <Grid size={6}>
 
-                    <Input
-                        disabled
-                        label="Order Number"
-                        name="orderNumber"
-                        value="12345" // Sample value
-                        InputProps={{
+                        <Input
+                            disabled
+                            label="Order Number"
+                            name="orderNumber"
+                            value={values.orderNumber}
+                            InputProps={{
 
-                            startAdornment: <StyledInputAdornment position="start">
-                                <Typography>#</Typography>
-                            </StyledInputAdornment>
-                        }}
-                    />
-                    <Select
-                        label="Customer"
-                        name="customerId"
-                        value={values.customerId}
-                        onChange={handleInputChange}
-                        options={customerList}
-                    />
-                </Grid>
+                                startAdornment: <StyledInputAdornment position="start">
+                                    <Typography>#</Typography>
+                                </StyledInputAdornment>
+                            }}
+                        />
+                        <Select
+                            label="Customer"
+                            name="customerId"
+                            value={values.customerId}
+                            onChange={handleInputChange}
+                            options={customerList}
+                            error={errors.customerId}
+                        />
+                    </Grid>
 
 
 
-                <Grid size={6}>
-                    <Select
-                        label="Payment Method"
-                        name="pMethod"
-                        onChange={handleInputChange}
-                        value={values.pMethod}
-                        options={pMethods}
-                    />
-                    <Input
-                        InputProps={{
+                    <Grid size={6}>
+                        <Select
+                            label="Payment Method"
+                            name="pMethod"
+                            onChange={handleInputChange}
+                            value={values.pMethod}
+                            options={pMethods}
+                            error={errors.pMethod}
 
-                            startAdornment: <StyledInputAdornment position="start">
-                                <Typography>$</Typography>
-                            </StyledInputAdornment>
-                        }}
-                        disabled label='Grand Total'
-                        value={values.gTotal}
-                        name='gTotal'
-                    />
-                    <StyledButtonGroup>
-                        <MuiButton
-                            size='large'
-                            endIcon={<RestaurantMenuIcon />}
-                            type='submit'
-                            color='primary'
+                        />
+                        <Input
+                            InputProps={{
+
+                                startAdornment: <StyledInputAdornment position="start">
+                                    <Typography>$</Typography>
+                                </StyledInputAdornment>
+                            }}
+                            disabled label='Grand Total'
+                            value={values.gTotal}
+                            name='gTotal'
+                        />
+                        <StyledButtonGroup>
+                            <MuiButton
+                                size='large'
+                                endIcon={<RestaurantMenuIcon />}
+                                type='submit'
+                                color='primary'
+                            >
+                                Submit
+                            </MuiButton>
+
+                            <MuiButton
+                                size='small'
+                                startIcon={<RefreshIcon />}
+                            >
+
+                            </MuiButton>
+                        </StyledButtonGroup>
+
+                        <Button
+                            size="large"
+                            startIcon={<Reorder />}
+                            color="warning"
+                            onClick={openListOfOrders}
                         >
-                            Submit
-                        </MuiButton>
-
-                        <MuiButton
-                            size='small'
-                            startIcon={<RefreshIcon />}
-                        >
-
-                        </MuiButton>
-                    </StyledButtonGroup>
-
-                    <Button
-                        size="large"
-                        startIcon={<Reorder />}
-                        color="warning"
-                    >
-                        Orders
-                    </Button>
+                            Orders
+                        </Button>
+                    </Grid>
                 </Grid>
-            </Grid>
-        </Form>
+            </Form>
+
+
+            <Popup
+                title="List Of Orders"
+                openPopup={orderListVisibility}
+                setOpenPopup={setOrderListVisibility}
+                children={<ListOfOrders />}
+            >
+
+            </Popup>
+
+        </>
     )
 }
 
