@@ -5,7 +5,8 @@ import { TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import { DeleteTwoTone } from "@mui/icons-material";
 
 export default function ListOfOrders(props) {
-  const { setOrderId, setOrderListVisibility } = props;
+  const { setOrderId, setOrderListVisibility, resetFormControls, setNotify } =
+    props;
   const [orderList, setOrderList] = useState([]);
 
   useEffect(() => {
@@ -18,6 +19,20 @@ export default function ListOfOrders(props) {
   const showForUpdate = (id) => {
     setOrderId(id);
     setOrderListVisibility(false);
+  };
+
+  const deleteOrder = (id) => {
+    if (window.confirm("Are you sure you want to delete this order?")) {
+      createAPIEndpoint(ENDPOINTS.ORDER)
+        .delete(id)
+        .then((res) => {
+          setOrderListVisibility(false);
+          setOrderId(0);
+          resetFormControls();
+          setNotify({ isOpen: true, message: "Deleted Successfully!" });
+        })
+        .catch((err) => console.log(err));
+    }
   };
 
   return (
@@ -35,15 +50,20 @@ export default function ListOfOrders(props) {
 
         <TableBody>
           {orderList.map((item) => (
-            <TableRow
-              key={item.orderMasterId}
-              onClick={(e) => showForUpdate(item.orderMasterId)}
-            >
-              <TableCell>{item.orderNumber}</TableCell>
-              <TableCell>{item.customer.customerName}</TableCell>
-              <TableCell>{item.pMethod}</TableCell>
-              <TableCell>{item.gTotal}</TableCell>
-              <TableCell>
+            <TableRow key={item.orderMasterId}>
+              <TableCell onClick={(e) => showForUpdate(item.orderMasterId)}>
+                {item.orderNumber}
+              </TableCell>
+              <TableCell onClick={(e) => showForUpdate(item.orderMasterId)}>
+                {item.customer.customerName}
+              </TableCell>
+              <TableCell onClick={(e) => showForUpdate(item.orderMasterId)}>
+                {item.pMethod}
+              </TableCell>
+              <TableCell onClick={(e) => showForUpdate(item.orderMasterId)}>
+                {item.gTotal}
+              </TableCell>
+              <TableCell onClick={(e) => deleteOrder(item.orderMasterId)}>
                 <DeleteTwoTone color="secondary" />
               </TableCell>
             </TableRow>

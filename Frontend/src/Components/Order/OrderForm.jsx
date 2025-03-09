@@ -13,6 +13,7 @@ import { createAPIEndpoint, ENDPOINTS } from "../../api";
 import { roundTo2DecimalPoint } from "../../utils";
 import Popup from "../../Layout/Popup";
 import ListOfOrders from "./ListOfOrders";
+import Notification from "../../Layout/Notificaiton";
 
 const pMethods = [
   { id: "none", title: "Select" },
@@ -65,6 +66,8 @@ const OrderForm = (props) => {
   const [orderListVisibility, setOrderListVisibility] = useState(false);
 
   const [orderId, setOrderId] = useState(0);
+
+  const [notify, setNotify] = useState({ isOpen: false });
 
   // Fetch customer list asynchronously
   useEffect(() => {
@@ -135,15 +138,38 @@ const OrderForm = (props) => {
   };
   // and every method iterates all values to check whether all return "" or not and returns true or false
 
+  //
+  //
+  // function for reseting for
+  const resetForm = () => {
+    resetFormControls();
+    setOrderId(0);
+  };
+  //
+  //
+
   // function for submitting order
   const submitOrder = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log(values);
-      createAPIEndpoint(ENDPOINTS.ORDER)
-        .create(values)
-        .then((res) => resetFormControls())
-        .catch((err) => console.log(err));
+      if (values.orderMasterId == 0) {
+        console.log(values);
+        createAPIEndpoint(ENDPOINTS.ORDER)
+          .create(values)
+          .then((res) => {
+            resetFormControls();
+            setNotify({ isOpen: true, message: "New Order Is Created!" });
+          })
+          .catch((err) => console.log(err));
+      } else {
+        createAPIEndpoint(ENDPOINTS.ORDER)
+          .update(values.orderMasterId, values)
+          .then((res) => {
+            setOrderId(0);
+            setNotify({ isOpen: true, message: "The Order Is Updated!" });
+          })
+          .catch((err) => console.log(err));
+      }
     }
   };
 
@@ -216,7 +242,12 @@ const OrderForm = (props) => {
                 Submit
               </MuiButton>
 
-              <MuiButton size="small" startIcon={<RefreshIcon />}></MuiButton>
+              <MuiButton
+                //  onClick={resetForm()}
+                onClick={resetForm}
+                size="small"
+                startIcon={<RefreshIcon />}
+              ></MuiButton>
             </StyledButtonGroup>
 
             <Button
@@ -235,8 +266,19 @@ const OrderForm = (props) => {
         title="List Of Orders"
         openPopup={orderListVisibility}
         setOpenPopup={setOrderListVisibility}
-        children={<ListOfOrders {...{ setOrderId, setOrderListVisibility }} />}
+        children={
+          <ListOfOrders
+            {...{
+              setOrderId,
+              setOrderListVisibility,
+              resetFormControls,
+              setNotify,
+            }}
+          />
+        }
       ></Popup>
+
+      <Notification {...{ notify, setNotify }} />
     </>
   );
 };

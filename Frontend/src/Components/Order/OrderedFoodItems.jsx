@@ -70,6 +70,15 @@ export default function OrderedFoodItems(props) {
       // here _ represents each item to be iterated. its just put for reference
       return i != index;
     });
+
+    //
+    //
+    //
+    // we initialized orderDetailId with 0.whenever an order is inserted, orderDetailId gets a non-zero number.if id!=0,then this fooditem is already added into the order
+
+    if (id != 0) {
+      x.deletedOrderItemIds += id + ","; //deletedOrderItemIds will contain the ids of fooditems that are deleted from the order
+    }
     setValues({ ...x });
   };
 
@@ -97,8 +106,6 @@ export default function OrderedFoodItems(props) {
             <ListItem
               secondaryAction={
                 <StyledDeleteButton className="deleteButton">
-                  {" "}
-                  {/* Add class name here */}
                   <IconButton
                     onClick={() =>
                       removeOrderedFoodItem(item.orderDetailId, index)

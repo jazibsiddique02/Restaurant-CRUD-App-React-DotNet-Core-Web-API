@@ -87,6 +87,22 @@ namespace RestaurantAPI.Controllers
 
             _context.Entry(orderMaster).State = EntityState.Modified;
 
+            //existing food items & newly added food items
+            foreach (OrderDetail item in orderMaster.OrderDetails)
+            {
+                if (item.OrderDetailId == 0)
+                    _context.OrderDetails.Add(item);
+                else
+                    _context.Entry(item).State = EntityState.Modified;
+            }
+
+            //deleted food items
+            foreach (var i in orderMaster.DeletedOrderItemIds.Split(',').Where(x => x != ""))
+            {
+                OrderDetail y = _context.OrderDetails.Find(Convert.ToInt64(i));
+                _context.OrderDetails.Remove(y);
+            }
+
             try
             {
                 await _context.SaveChangesAsync();
