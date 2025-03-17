@@ -11,6 +11,8 @@ Navigate To Frontend Directory in vscode:
 1. in the terminal , write npm i to install all dependencies.
 2. then, type "npm run dev" to run vite development server.
 
+When Everything is setup you can use FoodITemsTable_and_CustomersTable_DummyData.sql script to populate the FoodItems and Customers Table with dummy data. the file is shared in the root directory.
+
 ![Backend API](https://github.com/user-attachments/assets/de9a6bdd-d637-42e5-b230-3d2ba9e99f78)
 
 ![Frontend UI](https://github.com/user-attachments/assets/1d9dc270-1dfe-41ef-8609-94b0137f9cdd)
